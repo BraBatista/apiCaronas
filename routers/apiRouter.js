@@ -1,7 +1,8 @@
 const express = require('express')
+//const bcrypt = require('bcryptjs')
+//const jwt = require('jsonwebtoken')
+
 const apiRouter = express.Router()
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
 
 const knex = require('knex') ({
     client: 'pg',
@@ -10,7 +11,7 @@ const knex = require('knex') ({
         ssl: { rejectUnauthorized: false },
     }
 })
-
+/*
 let checkToken = (req, res, next) => {
     let authToken = req.headers["authorization"]
     if(!authToken) {
@@ -52,141 +53,157 @@ let isAdmin = (req, res, next) => {
             res.status(500).json({  
               message: 'Erro ao verificar roles de usuário - ' + err.message }) 
         }) 
-} 
+}*/ 
 
 // middleware processar o body em formato urlenconded
 apiRouter.use(express.urlencoded({ extended: true }))
 //middleware que processa o body em formato JSON
 apiRouter.use(express.json())
 
-// middleware Obter a lista de produtos do banco - RETRIEVE
-apiRouter.get('/produtos', checkToken, (req, res, next) => {
+// middleware Obter a lista de caronas do banco - RETRIEVE
+apiRouter.get('/caronas', (req, res, next) => {
     knex.select('*')
-        .from('produto')
-        .then(produtos => {
-            res.status(200).json(produtos)
+        .from('carona')
+        .then(caronas => {
+            res.status(200).json(caronas)
         })
         .catch(err => { 
             res.status(500).json({  
-            message: 'Erro ao recuperar produtos - ' + err.message }) 
+            message: 'Erro ao recuperar carona - ' + err.message }) 
+        })   
+})
+// middleware Obter um produto específico do banco - RETRIEVE
+apiRouter.get('/caronas/:id', (req, res, next) => {
+    knex.select('*')
+       .from('carona')
+       .where({ idcarona: req.params.id })
+       .then(caronas => {
+           if(caronas.length)
+               res.status(200).json(caronas[0])
+           else
+               res.status(404).json({ message: 'Carona não encontrada!' })
+       })
+       .catch(err => { 
+           res.status(500).json({  
+           message: 'Erro ao recuperar carona - ' + err.message }) 
+       })
+})
+// middleware Incluir uma carona (Post) no banco - CREATE
+apiRouter.post('/caronas', (req, res, next) => {
+    knex('carona')
+        .insert({ idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas })
+        .then(result => {
+            res.status(201).json({ message: 'Carona incluída com sucesso!' })    
+        })
+        .catch(err => { 
+            res.status(500).json({  
+            message: 'Erro ao incluir carona - ' + err.message }) 
+        })
+})
+// middleware Alterar uma carona (Put) no banco - UPDATE
+apiRouter.put('/caronas/:id', (req, res, next) => {
+    knex('carona')
+        .where({ idcarona: req.params.id })
+        .update({ idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas })
+        .then(n => {
+            if(n)
+                res.status(200).json({ message: 'Carona alterado com sucesso!' })
+            else
+                res.status(404).json({ message: 'Carona não encontrado para alteração.' })
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Erro na alteração - ' + err.message })
+        })   
+})
+// middleware Excluir um carona no banco (Delete) - DELETE
+apiRouter.delete('/caronas/:id', (req, res, next) => {
+    knex('carona')
+        .where({ idcarona: req.params.id })
+        .del()
+        .then(n => {
+            if(n)
+                res.status(200).json({ message: 'Carona excluída com sucesso!' })
+            else
+                res.status(404).json({ message: 'Carona não encontrada para exclusão.' })
+        })
+        .catch(err => {
+            res.status(500).json({ message: 'Erro na exclusão - ' + err.message })
+        })
+})
+/*
+// middleware Obter a lista de caronas do banco - RETRIEVE
+apiRouter.get('/caronas', checkToken, (req, res, next) => {
+    knex.select('*')
+        .from('carona')
+        .then(caronas => {
+            res.status(200).json(caronas)
+        })
+        .catch(err => { 
+            res.status(500).json({  
+            message: 'Erro ao recuperar carona - ' + err.message }) 
         })   
 })
 
-// middleware Obter um produto específico do banco - RETRIEVE
-apiRouter.get('/produtos/:id', checkToken, (req, res, next) => {
+// middleware Obter uma carona específico do banco - RETRIEVE
+apiRouter.get('/caronas/:id', checkToken, (req, res, next) => {
      knex.select('*')
-        .from('produto')
-        .where({ id: req.params.id })
-        .then(produtos => {
-            if(produtos.length)
-                res.status(200).json(produtos[0])
+        .from('carona')
+        .where({ idCarona: req.params.id })
+        .then(caronas => {
+            if(caronas.length)
+                res.status(200).json(caronas[0])
             else
-                res.status(404).json({ message: 'Produto não encontrado!' })
+                res.status(404).json({ message: 'Carona não encontrada!' })
         })
         .catch(err => { 
             res.status(500).json({  
-            message: 'Erro ao recuperar produto - ' + err.message }) 
+            message: 'Erro ao recuperar carona - ' + err.message }) 
         })
 })
 
-// middleware Incluir um produto (Post) no banco - CREATE
-apiRouter.post('/produtos', checkToken, isAdmin, (req, res, next) => {
-    knex('produto')
-        .insert({ descricao: req.body.descricao, valor: req.body.valor, marca: req.body.marca })
+// middleware Incluir uma carona (Post) no banco - CREATE
+apiRouter.post('/caronas', checkToken, isAdmin, (req, res, next) => {
+    knex('carona')
+        .insert({ idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas })
         .then(result => {
-            res.status(201).json({ message: 'Produto incluído com sucesso!' })    
+            res.status(201).json({ message: 'Carona incluída com sucesso!' })    
         })
         .catch(err => { 
             res.status(500).json({  
-            message: 'Erro ao incluir produto - ' + err.message }) 
+            message: 'Erro ao incluir carona - ' + err.message }) 
         })
 })
 
-// middleware Alterar um produto (Put) no banco - UPDATE
-apiRouter.put('/produtos/:id', checkToken, isAdmin, (req, res, next) => {
-    knex('produto')
-        .where({ id: req.params.id })
-        .update({ descricao: req.body.descricao, valor: req.body.valor, marca: req.body.marca })
+// middleware Alterar uma carona (Put) no banco - UPDATE
+apiRouter.put('/caronas/:id', checkToken, isAdmin, (req, res, next) => {
+    knex('carona')
+        .where({ idCarona: req.params.id })
+        .update({ idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas })
         .then(n => {
             if(n)
-                res.status(200).json({ message: 'Produto alterado com sucesso!' })
+                res.status(200).json({ message: 'Carona alterada com sucesso!' })
             else
-                res.status(404).json({ message: 'Produto não encontrado para alteração.' })
+                res.status(404).json({ message: 'Carona não encontrada para alteração.' })
         })
         .catch(err => {
             res.status(500).json({ message: 'Erro na alteração - ' + err.message })
         })   
 })
 
-// middleware Excluir um produto no banco (Delete) - DELETE
-apiRouter.delete('/produtos/:id', checkToken, isAdmin, (req, res, next) => {
-    knex('produto')
-        .where({ id: req.params.id })
+// middleware Excluir um carona no banco (Delete) - DELETE
+apiRouter.delete('/caronas/:id', checkToken, isAdmin, (req, res, next) => {
+    knex('carona')
+        .where({ idCarona: req.params.id })
         .del()
         .then(n => {
             if(n)
-                res.status(200).json({ message: 'Produto excluído com sucesso!' })
+                res.status(200).json({ message: 'Carona excluída com sucesso!' })
             else
-                res.status(404).json({ message: 'Produto não encontrado para exclusão.' })
+                res.status(404).json({ message: 'Carona não encontrado para exclusão.' })
         })
         .catch(err => {
             res.status(500).json({ message: 'Erro na exclusão - ' + err.message })
         })
-})
-
-
-// middleware de segurança, Inserir um novo usuário no banco
-apiRouter.post ('/register', (req, res) => { 
-    knex ('usuario') 
-        .insert({ 
-            nome: req.body.nome,  
-            login: req.body.login,  
-            senha: bcrypt.hashSync(req.body.senha, 8),  
-            email: req.body.email 
-        }, ['id']) 
-        .then((result) => { 
-            let usuario = result[0] 
-            res.status(200).json({"id": usuario.id })  
-            return 
-        }) 
-        .catch(err => { 
-            res.status(500).json({  
-                message: 'Erro ao registrar usuário - ' + err.message }) 
-        })   
-})
-
-// middleware de segurança, Login e gerar token
-apiRouter.post('/login', (req, res) => {  
-    knex 
-      .select('*')
-      .from('usuario')
-      .where({ login: req.body.login }) 
-      .then( usuarios => { 
-          if(usuarios.length){ 
-              let usuario = usuarios[0] 
-              let checkSenha = bcrypt.compareSync(req.body.senha, usuario.senha) 
-              if(checkSenha) { 
-                var tokenJWT = jwt.sign({ id: usuario.id }, process.env.SECRET_KEY, { 
-                    expiresIn: 3600 
-                }) 
- 
-                res.status(200).json ({ 
-                    id: usuario.id, 
-                    login: usuario.login,  
-                    nome: usuario.nome,  
-                    roles: usuario.roles, 
-                    token: tokenJWT 
-                })   
-                return  
-              } 
-          }  
-             
-          res.status(401).json({ message: 'Login ou senha incorretos.' }) 
-      }) 
-      .catch (err => { 
-          res.status(500).json({  
-             message: 'Erro ao verificar login - ' + err.message }) 
-      }) 
-}) 
+})*/
 
 module.exports = apiRouter

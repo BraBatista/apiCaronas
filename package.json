@@ -1,7 +1,6 @@
 {
   "name": "apicaronas",
   "version": "1.0.0",
-  "description": "",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -11,7 +10,21 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.0.0",
     "express": "^4.17.3",
-    "morgan": "^1.10.0"
-  }
+    "jsonwebtoken": "^8.5.1",
+    "knex": "^1.0.7",
+    "morgan": "^1.10.0",
+    "pg": "^8.7.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BraulioBarbosa/apiCaronas.git"
+  },
+  "bugs": {
+    "url": "https://github.com/BraulioBarbosa/apiCaronas/issues"
+  },
+  "homepage": "https://github.com/BraulioBarbosa/apiCaronas#readme",
+  "description": ""
 }
