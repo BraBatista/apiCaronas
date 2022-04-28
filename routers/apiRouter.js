@@ -1,3 +1,4 @@
+const { response } = require('express')
 const express = require('express')
 //const bcrypt = require('bcryptjs')
 //const jwt = require('jsonwebtoken')
@@ -60,16 +61,20 @@ apiRouter.use(express.urlencoded({ extended: true }))
 //middleware que processa o body em formato JSON
 apiRouter.use(express.json())
 
+const cityName = { 1: "Coronel fabriciano", 2: "Ipatinga", 3: "Timóteo"  }
+
 // middleware Obter a lista de caronas do banco - RETRIEVE
 apiRouter.get('/caronas', (req, res, next) => {
-    knex.select('*')
-        .from('carona')
+        knex('carona as ca')
+        .select('ca.idcarona', 'ca.idusuario', 'ca.idcidorigem', 'c1.nmcidade as nmcideorigem', 'ca.idciddestino', 'c2.nmcidade as nmciddestino', 'ca.vagas', 'ca.telefone')
+        .join('cidade as c1', 'ca.idcidorigem', '=', 'c1.idcidade')
+        .join('cidade as c2', 'ca.idciddestino', '=', 'c2.idcidade')
         .then(caronas => {
             res.status(200).json(caronas)
         })
         .catch(err => { 
             res.status(500).json({  
-            message: 'Erro ao recuperar carona - ' + err.message }) 
+            message: 'Erro ao recuperar caronas - ' + err.message }) 
         })   
 })
 // middleware Obter um produto específico do banco - RETRIEVE
