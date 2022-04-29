@@ -77,7 +77,7 @@ apiRouter.get('/caronas', (req, res, next) => {
             message: 'Erro ao recuperar caronas - ' + err.message }) 
         })   
 })
-// middleware Obter um produto específico do banco - RETRIEVE
+// middleware Obter uma carona específica do banco - RETRIEVE
 apiRouter.get('/caronas/:id', (req, res, next) => {
     knex.select('*')
        .from('carona')
@@ -92,6 +92,21 @@ apiRouter.get('/caronas/:id', (req, res, next) => {
            res.status(500).json({  
            message: 'Erro ao recuperar carona - ' + err.message }) 
        })
+})
+// middleware Obter caronas do banco, passando parâmetros cidade origem e cidade destino - RETRIEVE
+apiRouter.get('/caronas/cidades/:idCidadeOrigem/cidades/:idCidadeDestino', (req, res, next) => {
+    knex('carona as ca')
+        .select('ca.idcarona', 'ca.idusuario', 'ca.idcidorigem', 'c1.nmcidade as nmcidorigem', 'ca.idciddestino', 'c2.nmcidade as nmciddestino', 'ca.vagas', 'ca.telefone', 'ca.hrsaida', 'ca.hrretorno')
+        .join('cidade as c1', 'ca.idcidorigem', '=', 'c1.idcidade')
+        .join('cidade as c2', 'ca.idciddestino', '=', 'c2.idcidade')
+        .where({ 'ca.idcidorigem' : req.params.idCidadeOrigem, 'ca.idciddestino': req.params.idCidadeDestino })
+        .then(caronas => {
+            res.status(200).json(caronas)
+        })
+        .catch(err => { 
+            res.status(500).json({  
+            message: 'Erro ao recuperar caronas - ' + err.message }) 
+        })
 })
 // middleware Incluir uma carona (Post) no banco - CREATE
 apiRouter.post('/caronas', (req, res, next) => {
