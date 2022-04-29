@@ -66,7 +66,7 @@ const cityName = { 1: "Coronel fabriciano", 2: "Ipatinga", 3: "Timóteo"  }
 // middleware Obter a lista de caronas do banco - RETRIEVE
 apiRouter.get('/caronas', (req, res, next) => {
         knex('carona as ca')
-        .select('ca.idcarona', 'ca.idusuario', 'ca.idcidorigem', 'c1.nmcidade as nmcideorigem', 'ca.idciddestino', 'c2.nmcidade as nmciddestino', 'ca.vagas', 'ca.telefone', 'ca.hrsaida', 'ca.hrretorno')
+        .select('ca.idcarona', 'ca.idusuario', 'ca.idcidorigem', 'c1.nmcidade as nmcidorigem', 'ca.idciddestino', 'c2.nmcidade as nmciddestino', 'ca.vagas', 'ca.telefone', 'ca.hrsaida', 'ca.hrretorno')
         .join('cidade as c1', 'ca.idcidorigem', '=', 'c1.idcidade')
         .join('cidade as c2', 'ca.idciddestino', '=', 'c2.idcidade')
         .then(caronas => {
