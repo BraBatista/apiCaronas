@@ -63,6 +63,7 @@ apiRouter.use(express.json())
 
 const cityName = { 1: "Coronel fabriciano", 2: "Ipatinga", 3: "Timóteo"  }
 
+// versão 4
 // middleware Obter a lista de caronas do banco - RETRIEVE
 apiRouter.get('/caronas', (req, res, next) => {
         knex('carona as ca')
@@ -111,7 +112,7 @@ apiRouter.get('/caronas/cidades/:idCidadeOrigem/cidades/:idCidadeDestino', (req,
 // middleware Incluir uma carona (Post) no banco - CREATE
 apiRouter.post('/caronas', (req, res, next) => {
     knex('carona')
-        .insert({ idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas })
+        .insert({ idusuario: req.body.idusuario, idcidorigem: req.body.idcidorigem, idciddestino: req.body.idciddestino, vagas: req.body.vagas, telefone: req.body.telefone, hrsaida: req.body.hrsaida, hrretorno: req.body.hrretorno })
         .then(result => {
             res.status(201).json({ message: 'Carona incluída com sucesso!' })    
         })
